@@ -177,7 +177,6 @@ export function ChatHeader({ contact, onBack, isMobile = false }: ChatHeaderProp
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               initial={{ rotate: 0 }}
-              whileHover={{ rotate: 5 }}
             >
               <Button 
                 variant="ghost" 
