@@ -1,34 +1,31 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const uiFolder = path.join(__dirname, 'src', 'components', 'ui');
+// Path to your UI components folder
+const uiFolder = path.join(__dirname, "src/components/ui");
 
-const radixPackages = [
-  'dialog',
-  'scroll-area',
-  'checkbox',
-  'switch',
-  'tabs',
-  'tooltip',
-  'select',
-  'avatar',
-  'toast',
-];
+// Regex to match Radix imports with versions
+const radixRegex = /@radix-ui\/([\w-]+)@\d+\.\d+\.\d+/g;
 
-fs.readdirSync(uiFolder).forEach(file => {
-  if (file.endsWith('.tsx')) {
-    const filePath = path.join(uiFolder, file);
-    let content = fs.readFileSync(filePath, 'utf-8');
-
-    // Replace any @radix-ui imports with proper import
-    radixPackages.forEach(pkg => {
-      const regex = new RegExp(`@radix-ui/react-${pkg}(@[\\d\\.]+)?`, 'g');
-      content = content.replace(regex, `@radix-ui/react-${pkg}`);
-    });
-
-    fs.writeFileSync(filePath, content, 'utf-8');
-    console.log(`Fixed imports in: ${file}`);
+function fixFile(filePath) {
+  let content = fs.readFileSync(filePath, "utf-8");
+  const newContent = content.replace(radixRegex, "@radix-ui/$1");
+  if (newContent !== content) {
+    fs.writeFileSync(filePath, newContent, "utf-8");
+    console.log(`Fixed: ${filePath}`);
   }
-});
+}
 
-console.log('✅ All UI imports fixed!');
+function walkDir(dir) {
+  fs.readdirSync(dir).forEach(file => {
+    const fullPath = path.join(dir, file);
+    if (fs.statSync(fullPath).isDirectory()) {
+      walkDir(fullPath);
+    } else if (fullPath.endsWith(".tsx") || fullPath.endsWith(".ts")) {
+      fixFile(fullPath);
+    }
+  });
+}
+
+walkDir(uiFolder);
+console.log("✅ All Radix versioned imports removed!");
